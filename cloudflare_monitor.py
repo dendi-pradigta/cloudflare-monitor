@@ -70,7 +70,7 @@ def send_slack_alert(location: str, component_name: str, status: str):
     emoji = STATUS_EMOJI.get(status, ":question:")
 
     color = "good"
-    if status == "partial_outage":
+    if status in  ["partial_outage", "under_maintenance"]:
         color = "warning"
     elif status in ["major_outage", "degraded_performance"]:
         color = "danger"
@@ -98,7 +98,7 @@ def send_slack_alert(location: str, component_name: str, status: str):
         else:
             logging.error(f"Failed to send to Slack: {response.status_code} - {response.text}")
     except Exception as e:
-        logging.error(f"💥 Error sending to Slack: {e}")
+        logging.error(f"Error sending to Slack: {e}")
 
 
 def fetch_components():
@@ -140,8 +140,8 @@ def main():
         logging.warning("   ⇒ Run with: export SLACK_WEBHOOK_URL='https://hooks.slack.com/...'")
     
     locations_str = ", ".join(TARGET_LOCATIONS) if TARGET_LOCATIONS else "(none)"
-    logging.info(f"🚀 Starting monitoring for locations: {locations_str}")
-    logging.info(f"⏱  Checking every {SLEEP_INTERVAL} seconds...")
+    logging.info(f"Starting monitoring for locations: {locations_str}")
+    logging.info(f"Checking every {SLEEP_INTERVAL} seconds...")
 
     while True:
         components = fetch_components()
@@ -166,7 +166,7 @@ def main():
 
             if current_status != prev_status:
                 label = STATUS_LABEL.get(current_status, current_status)
-                logging.info(f"🔔 STATUS CHANGE: {loc.title()} → {label} (Component: {data['component_name']})")
+                logging.info(f"STATUS CHANGE: {loc.title()} → {label} (Component: {data['component_name']})")
 
                 # Send to Slack
                 send_slack_alert(loc, data["component_name"], current_status)
