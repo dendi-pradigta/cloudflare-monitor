@@ -1,0 +1,53 @@
+# ========================
+# Python
+# ========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.db
+*.sqlite3
+
+# Virtual environments
+env/
+venv/
+.venv/
+
+# ========================
+# Docker
+# ========================
+# Ignore build artifacts and logs
+*.pid
+*.seed
+*.bak
+*.swp
+*.swo
+docker-compose.override.yml
+
+# ========================
+# Environment & secrets
+# ========================
+.env
+*.env.local
+*.secret
+secrets.yml
+credentials.json
+
+# ========================
+# System / Editor files
+# ========================
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+
+# ========================
+# Other
+# ========================
+# Ignore generated files (if you ever export logs or reports)
+logs/
+*.tar
+*.zip
+*.gz

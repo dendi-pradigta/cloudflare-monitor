@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  cloudflare-monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cloudflare-monitor
+    restart: unless-stopped
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS https://www.cloudflarestatus.com/api/v2/components.json >/dev/null || exit 1"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
