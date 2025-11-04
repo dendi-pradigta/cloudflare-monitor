@@ -95,16 +95,6 @@ All runtime configuration is done via environment variables.
 
 > 💡 **Tip:** You can override these values directly in `docker-compose.yml` or via CLI with `-e`.
 
----
-
-## 🔄 Updating Configuration
-
-You **don’t need to rebuild** the Docker image when changing environment variables.
-Simply edit `.env` and restart the container:
-
-```bash
-docker compose up -d --force-recreate
-```
 
 ---
 
