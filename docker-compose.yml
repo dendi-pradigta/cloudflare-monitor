@@ -1,21 +1,23 @@
-version: "3.9"
+version: '3.8'
 
 services:
   cloudflare-monitor:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     container_name: cloudflare-monitor
-    restart: unless-stopped
     env_file:
       - .env
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fsS https://www.cloudflarestatus.com/api/v2/components.json >/dev/null || exit 1"]
-      interval: 1m
-      timeout: 10s
-      retries: 3
+    volumes:
+      - ./monitor-data:/data          # Persistensi status antar restart
+      # - ./logs:/data/logs           # (opsional) jika aktifkan file logging
+    restart: unless-stopped
     logging:
-      driver: json-file
+      driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import os; exit(0) if os.path.exists('/tmp/healthy') else exit(1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
