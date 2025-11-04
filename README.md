@@ -152,14 +152,6 @@ This ensures the container is only marked “healthy” if Cloudflare’s API is
 
 ---
 
-## 🔐 Security Notes
-
-* **Never commit your `.env` file** — it contains your Slack webhook URL.
-* The `.gitignore` file already excludes `.env` to prevent accidental leaks.
-* If your webhook is exposed, **rotate it immediately** in Slack.
-
----
-
 ## 🧱 Example Slack Alert
 
 When a monitored location changes status, you’ll receive a message like this:
