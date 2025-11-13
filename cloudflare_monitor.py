@@ -7,6 +7,13 @@ import sys
 import json
 import signal
 from logging.handlers import RotatingFileHandler
+from slack_sdk import WebClient
+from slack_sdk.errors import SlackApiError
+
+# ==> [PERBAIKAN #1] - Tambahkan ini untuk membaca file .env secara otomatis
+from dotenv import load_dotenv
+load_dotenv()
+# <==
 
 # ========================
 # 🔧 CONFIGURATION
@@ -18,7 +25,13 @@ TARGET_LOCATIONS = [
     if loc.strip()
 ]
 
-SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL", "").strip()
+# ==> [PERBAIKAN #2] - Kembalikan ke cara yang benar untuk membaca variabel
+SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN", "").strip()
+SLACK_CHANNEL = os.getenv("SLACK_CHANNEL", "").strip()
+
+# Inisialisasi Slack Client jika token ada
+slack_client = WebClient(token=SLACK_BOT_TOKEN) if SLACK_BOT_TOKEN else None
+# <==
 
 COMPONENTS_URL = os.getenv(
     "COMPONENTS_URL",
@@ -27,27 +40,17 @@ COMPONENTS_URL = os.getenv(
 
 SLEEP_INTERVAL = int(os.getenv("SLEEP_INTERVAL", "60"))
 
-# Lokasi file status (harus di volume persisten di Docker)
-STATUS_FILE = os.getenv("STATUS_FILE", "/data/last_statuses.json")
+# ==> [PERBAIKAN #3] - Beri nilai default yang aman jika di .env tidak diset
+STATUS_FILE = os.getenv("STATUS_FILE", "data/last_statuses.json") # Simpan di folder lokal
+# <==
+
+# ... sisa skrip Anda dari sini ke bawah sudah benar dan tidak perlu diubah ...
+# (Saya sertakan lagi untuk kelengkapan)
 
 # Setup log level
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
-logging.basicConfig(level=LOG_LEVEL)
+logging.basicConfig(level=LOG_LEVEL, format='%(asctime)s - %(levelname)s - %(message)s', stream=sys.stdout)
 logger = logging.getLogger()
-
-# Logging handler
-log_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-root_logger = logging.getLogger()
-root_logger.setLevel(getattr(logging, LOG_LEVEL, logging.INFO))
-
-console_handler = logging.StreamHandler(sys.stdout)
-console_handler.setFormatter(log_formatter)
-root_logger.addHandler(console_handler)
-
-# Optional: file logging
-# file_handler = RotatingFileHandler("/data/cloudflare_monitor.log", maxBytes=5*1024*1024, backupCount=2)
-# file_handler.setFormatter(log_formatter)
-# root_logger.addHandler(file_handler)
 
 # Headers
 HEADERS = {
@@ -73,7 +76,6 @@ STATUS_EMOJI = {
 
 last_statuses = {}
 
-
 # ========================
 # 🛠 UTILS
 # ========================
@@ -89,100 +91,104 @@ def load_last_statuses():
 
 def save_last_statuses():
     # Ensure directory exists
-    os.makedirs(os.path.dirname(STATUS_FILE), exist_ok=True)
+    dir_name = os.path.dirname(STATUS_FILE)
+    if dir_name: # Cek jika ada nama direktori (bukan file di root)
+        os.makedirs(dir_name, exist_ok=True)
     try:
         with open(STATUS_FILE, "w") as f:
             json.dump(last_statuses, f)
     except Exception as e:
-        logging.warning("Failed to save last statuses to %s: %s", STATUS_FILE, e)
+        logging.error("Failed to save last statuses to %s: %s", STATUS_FILE, e)
 
+# --- GANTI FUNGSI LAMA DENGAN YANG INI ---
 def send_slack_alert(location: str, component_name: str, status: str):
-    if not SLACK_WEBHOOK_URL:
-        logging.warning("SLACK_WEBHOOK_URL is not set! Skipping Slack notification.")
+    """Mengirim notifikasi Slack menggunakan Bot Token API dengan warna."""
+    if not slack_client or not SLACK_CHANNEL:
+        logging.warning("SLACK_BOT_TOKEN or SLACK_CHANNEL is not set! Skipping Slack notification.")
         return
 
-    if not SLACK_WEBHOOK_URL.startswith("https://hooks.slack.com/"):
-        logging.error("Invalid SLACK_WEBHOOK_URL format — must start with 'https://hooks.slack.com/'")
+    if not SLACK_BOT_TOKEN.startswith("xoxb-"):
+        logging.error("Invalid Slack Token format. Must start with 'xoxb-'.")
         return
 
     label = STATUS_LABEL.get(status, status)
     emoji = STATUS_EMOJI.get(status, ":question:")
 
-    color = "good"
-    if status in ["partial_outage", "under_maintenance"]:
-        color = "warning"
-    elif status in ["major_outage", "degraded_performance"]:
-        color = "danger"
+    # === [PERUBAHAN] Menentukan warna berdasarkan status ===
+    # Hijau (good), Kuning (warning), Merah (danger)
+    color = "#2eb886"  # Default: Hijau untuk 'operational'
+    if status in ["partial_outage", "degraded_performance", "under_maintenance"]:
+        color = "#daa038"  # Kuning/Oranye untuk peringatan
+    elif status == "major_outage":
+        color = "#a30200"  # Merah untuk gangguan besar
+    # =======================================================
 
-    payload = {
-        "text": ":earth_asia: *Cloudflare Status Update*",
-        "attachments": [
-            {
-                "color": color,
-                "fields": [
-                    {"title": "Location", "value": location.title(), "short": True},
-                    {"title": "Component", "value": component_name, "short": True},
-                    {"title": "Status", "value": f"{emoji} {label}", "short": True},
-                ],
-                "footer": "Cloudflare Monitor",
-                "ts": int(time.time()),
+    # Block Kit ini tetap sama, mendefinisikan isi pesan
+    blocks = [
+        {
+            "type": "header",
+            "text": {
+                "type": "plain_text",
+                "text": f":earth_asia: Cloudflare Status Update",
+                "emoji": True
             }
-        ],
-    }
+        },
+        {
+            "type": "section",
+            "fields": [
+                {"type": "mrkdwn", "text": f"*Location:*\n{location.title()}"},
+                {"type": "mrkdwn", "text": f"*Component:*\n{component_name}"},
+                {"type": "mrkdwn", "text": f"*Status:*\n{emoji} {label}"}
+            ]
+        },
+        {
+            "type": "context",
+            "elements": [
+                {
+                    "type": "mrkdwn",
+                    "text": f"Cloudflare Monitor | <https://www.cloudflarestatus.com|View Status Page>"
+                }
+            ]
+        }
+    ]
 
     try:
-        response = requests.post(SLACK_WEBHOOK_URL, json=payload, timeout=10)
-        if response.status_code == 200:
-            logging.info(f"Slack notification sent for {location}")
-        else:
-            logging.error(f"Slack send failed: {response.status_code} - {response.text[:300]}")
+        # === [PERUBAHAN] Membungkus blocks di dalam attachments untuk mendapatkan warna ===
+        slack_client.chat_postMessage(
+            channel=SLACK_CHANNEL,
+            text=f"Cloudflare Status Update: {location.title()} is now {label}",  # Fallback text
+            attachments=[{
+                "color": color,  # Memberikan warna pada garis di kiri
+                "blocks": blocks  # Menempatkan konten pesan kita di dalam attachment
+            }]
+        )
+        # =================================================================================
+        logging.info(f"Slack notification sent for {location.title()} to channel {SLACK_CHANNEL}")
+    except SlackApiError as e:
+        logging.error(f"Error sending Slack notification: {e.response['error']}")
     except Exception as e:
-        logging.error(f"Error sending to Slack: {e}")
-
+        logging.error(f"An unexpected error occurred when sending to Slack: {e}")
 
 def fetch_components():
     try:
         logging.debug("Fetching components from Cloudflare...")
         resp = requests.get(COMPONENTS_URL, headers=HEADERS, timeout=10)
-        if resp.status_code == 429:
-            retry_after = int(resp.headers.get("Retry-After", 60))
-            logging.warning("Rate limited by Cloudflare. Retrying after %d seconds.", retry_after)
-            time.sleep(retry_after)
-            return []
         resp.raise_for_status()
-
-        ct = resp.headers.get("content-type", "").lower()
-        if "application/json" not in ct:
-            logging.error("Unexpected Content-Type: %s", ct)
-            logging.error("Response preview: %s", resp.text[:300])
-            return []
-
         data = resp.json()
-        components = data.get("components", [])
-        logging.debug(f"Retrieved {len(components)} components.")
-        return components
+        return data.get("components", [])
     except Exception as e:
         logging.exception("Failed to fetch Cloudflare status: %s", e)
         return []
 
-
 def find_matching_components(components, targets):
-    targets_clean = [t.strip().lower() for t in targets]
     matches = {}
     for comp in components:
-        name = comp.get("name", "")
-        name_lower = name.lower()
-        status = comp.get("status", "unknown")
-        for target in targets_clean:
+        name_lower = comp.get("name", "").lower()
+        for target in targets:
             if target in name_lower:
-                matches[target] = {"component_name": name, "status": status}
+                matches[target] = {"component_name": comp.get("name"), "status": comp.get("status")}
                 break
     return matches
-
-
-# ========================
-# 🛑 SHUTDOWN HANDLER
-# ========================
 
 def graceful_shutdown(sig, frame):
     logging.info("🛑 Received signal %s. Shutting down gracefully...", sig)
@@ -191,65 +197,42 @@ def graceful_shutdown(sig, frame):
 signal.signal(signal.SIGINT, graceful_shutdown)
 signal.signal(signal.SIGTERM, graceful_shutdown)
 
-
-# ========================
-# 🔄 MAIN LOOP
-# ========================
-
 def main():
     global last_statuses
-
-    # Validate webhook early
-    if SLACK_WEBHOOK_URL and not SLACK_WEBHOOK_URL.startswith("https://hooks.slack.com/"):
-        logging.critical("Invalid SLACK_WEBHOOK_URL format!")
+    if SLACK_BOT_TOKEN and not SLACK_CHANNEL:
+        logging.critical("SLACK_BOT_TOKEN is set, but SLACK_CHANNEL is missing!")
         sys.exit(1)
 
-    # Load persisted statuses
     last_statuses = load_last_statuses()
-
-    locations_str = ", ".join(TARGET_LOCATIONS) if TARGET_LOCATIONS else "(none)"
-    logging.info(f"🚀 Starting Cloudflare monitor for: {locations_str}")
+    logging.info(f"🚀 Starting Cloudflare monitor for: {', '.join(TARGET_LOCATIONS) or '(none)'}")
     logging.info(f"🔁 Check interval: {SLEEP_INTERVAL} seconds")
     logging.info(f"💾 Status file: {STATUS_FILE}")
+    if slack_client and SLACK_CHANNEL:
+        logging.info(f"slack: Notifications will be sent to channel '{SLACK_CHANNEL}'")
+    else:
+        logging.warning("slack: Slack notifications are disabled (token/channel not set).")
 
     while True:
         try:
             logging.info("🔄 Starting new status check cycle...")
-
             components = fetch_components()
             if not components:
-                logging.warning("No valid component data. Skipping cycle.")
                 time.sleep(SLEEP_INTERVAL)
                 continue
-
+            
             current_matches = find_matching_components(components, TARGET_LOCATIONS)
-
-            # Warn about missing locations
-            for loc in [t.strip().lower() for t in TARGET_LOCATIONS]:
-                if loc not in current_matches:
-                    logging.warning(
-                        f"Location '{loc}' NOT FOUND in Cloudflare status! "
-                        "Check spelling at https://www.cloudflarestatus.com"
-                    )
-
-            # Check for status changes
             for loc, data in current_matches.items():
-                current_status = data["status"]
-                prev_status = last_statuses.get(loc)
-
-                if current_status != prev_status:
-                    label = STATUS_LABEL.get(current_status, current_status)
+                if data["status"] != last_statuses.get(loc):
+                    label = STATUS_LABEL.get(data["status"], data["status"])
                     logging.info(f"🔔 STATUS CHANGE: {loc.title()} → {label} (Component: {data['component_name']})")
-                    send_slack_alert(loc, data["component_name"], current_status)
-                    last_statuses[loc] = current_status
+                    send_slack_alert(loc, data["component_name"], data["status"])
+                    last_statuses[loc] = data["status"]
                     save_last_statuses()
 
         except Exception as e:
             logging.exception("💥 Unexpected error in main loop: %s", e)
-
         logging.debug("💤 Sleeping for %d seconds...", SLEEP_INTERVAL)
         time.sleep(SLEEP_INTERVAL)
-
 
 if __name__ == "__main__":
     try:

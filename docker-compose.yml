@@ -7,7 +7,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./monitor-data:/data          # Persistensi status antar restart
+      - ./data:/data          # Persistensi status antar restart
       # - ./logs:/data/logs           # (opsional) jika aktifkan file logging
     restart: unless-stopped
     logging:
@@ -16,8 +16,10 @@ services:
         max-size: "10m"
         max-file: "3"
     healthcheck:
-      test: ["CMD", "python", "-c", "import os; exit(0) if os.path.exists('/tmp/healthy') else exit(1)"]
-      interval: 30s
+      # Cek apakah file status telah dimodifikasi dalam 2 menit terakhir.
+      # Interval pengecekan kita 60 detik, jadi 2 menit adalah batas yang aman.
+      test: ["CMD", "find", "/data/last_statuses.json", "-mmin", "-2"]
+      interval: 60s
       timeout: 5s
       retries: 3
-      start_period: 10s
+      start_period: 20s
