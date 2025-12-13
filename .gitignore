@@ -47,6 +47,15 @@ Thumbs.db
 # Runtime data files
 # ========================
 data/*.json
+data/*.backup
+
+# ========================
+# Security scan reports
+# ========================
+.bandit
+bandit-report.json
+safety-report.json
+trufflehog-report.json
 
 # ========================
 # Other
