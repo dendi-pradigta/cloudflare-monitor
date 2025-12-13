@@ -16,14 +16,14 @@ We highly encourage switching to the new `scan` command which is easier to use, 
     "report_meta": {
         "scan_target": "environment",
         "scanned": [
-            "/home/dendi/.local/lib/python3.10/site-packages",
+            "/usr/lib/python3/dist-packages",
             "/usr/local/lib/python3.10/dist-packages",
-            "/usr/lib/python3/dist-packages"
+            "/home/dendi/.local/lib/python3.10/site-packages"
         ],
         "scanned_full_path": [
-            "/home/dendi/.local/lib/python3.10/site-packages",
+            "/usr/lib/python3/dist-packages",
             "/usr/local/lib/python3.10/dist-packages",
-            "/usr/lib/python3/dist-packages"
+            "/home/dendi/.local/lib/python3.10/site-packages"
         ],
         "target_languages": [
             "python"
@@ -35,7 +35,7 @@ We highly encourage switching to the new `scan` command which is easier to use, 
         "account": "",
         "local_database_path": null,
         "safety_version": "3.7.0",
-        "timestamp": "2025-12-13 08:01:13",
+        "timestamp": "2025-12-13 09:17:49",
         "packages_found": 134,
         "vulnerabilities_found": 52,
         "vulnerabilities_ignored": 0,
@@ -57,7 +57,7 @@ We highly encourage switching to the new `scan` command which is easier to use, 
         "git": {
             "branch": "feature/github-workflows",
             "tag": "",
-            "commit": "5de5e7437f352cd8ab19cd0077ab6045569c2ea2",
+            "commit": "e020db3fb789e1a51eb2b1478545f97fcdcb7eb7",
             "dirty": "True",
             "origin": "git@github.com:dendi-pradigta/cloudflare-monitor.git"
         },
