@@ -65,6 +65,36 @@ This prevents duplicate alerts when the container restarts.
 
 ---
 
+## 🚨 Alert Status & Color Mapping
+
+### Location Monitor (Component Status)
+| Status | Color | Description |
+|--------|-------|-------------|
+| `operational` | 🟢 Green | System is working normally |
+| `partial_outage` | 🟡 Yellow | Some services are re-routed |
+| `major_outage` | 🔴 Red | Services are fully re-routed |
+| `degraded_performance` | 🔴 Red | Performance is degraded |
+| `under_maintenance` | 🟡 Yellow | Scheduled maintenance in progress |
+
+### Incident Monitor (Global Incidents)
+| Status | Color | Description |
+|--------|-------|-------------|
+| `investigating` | 🔴 Red | Incident is being investigated |
+| `identified` | 🔴 Red | Root cause has been identified |
+| `monitoring` | 🔴 Red | Incident is being monitored |
+| `resolved` | 🟢 Green | Incident has been resolved |
+
+### Opsgenie Priority Mapping
+| Status | Priority | Severity |
+|--------|----------|----------|
+| `critical`, `major_outage` | P1 | Critical |
+| `major`, `partial_outage` | P2 | High |
+| `minor`, `degraded_performance` | P3 | Medium |
+| `under_maintenance` | P5 | Low |
+| Other statuses | P4 | Normal |
+
+---
+
 ## 📝 Notes
 
 - Only sends alert **when status changes**
