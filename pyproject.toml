@@ -1,0 +1,97 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cloudflare-monitor"
+version = "0.0.2"
+description = "Simple Python script to monitor Cloudflare edge locations and send alerts"
+authors = [{name = "Dendi Pradigta", email = "dendi@example.com"}]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "python-dotenv>=1.2.1",
+    "requests>=2.32.5",
+    "slack_sdk>=3.37.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+    "safety>=2.0.0",
+    "bandit>=1.7.0",
+    "trufflehog>=2.1.0",
+]
+
+[project.scripts]
+cloudflare-monitor = "cloudflare_monitor:main"
+incident-monitor = "incident_monitor:main"
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "S",   # flake8-bandit
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "DTZ", # flake8-datetimez
+    "T10", # flake8-debugger
+    "T20", # flake8-print
+    "SIM", # flake8-simplify
+]
+ignore = [
+    "E501",  # line too long, handled by formatter
+    "S603",  # subprocess call - check for execution of untrusted input
+    "S607",  # start process with partial executable path
+    "T201",   # print found
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[tool.ruff.lint.isort]
+known-first-party = ["cloudflare_monitor", "incident_monitor", "notifications"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = false
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = false
+disallow_untyped_decorators = false
+no_implicit_optional = true
+warn_redundant_casts = false
+warn_unused_ignores = true
+warn_no_return = false
+warn_unreachable = false
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "requests.*",
+    "slack_sdk.*",
+]
+ignore_missing_imports = true

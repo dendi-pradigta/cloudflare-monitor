@@ -1,0 +1,45 @@
+name: Docker Validation
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    name: Docker & Compose Validation
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          failure-threshold: warning
+          
+      - name: Validate docker-compose syntax
+        run: |
+          # Create empty .env file for CI validation if it doesn't exist
+          if [ ! -f ".env" ]; then
+            touch .env
+          fi
+          docker compose -f docker-compose.yml config --quiet
+          
+      - name: Check Docker Compose file exists
+        run: |
+          if [ ! -f "docker-compose.yml" ]; then
+            echo "docker-compose.yml not found"
+            exit 1
+          fi
+          
+      - name: Validate Dockerfile exists
+        run: |
+          if [ ! -f "Dockerfile" ]; then
+            echo "Dockerfile not found"
+            exit 1
+          fi

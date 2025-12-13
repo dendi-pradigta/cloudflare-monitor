@@ -1,5 +1,8 @@
 # Cloudflare Status Monitor
 
+![CI Pipeline](https://github.com/dendi-pradigta/cloudflare-monitor/workflows/CI%20Pipeline/badge.svg)
+![Docker Validation](https://github.com/dendi-pradigta/cloudflare-monitor/workflows/Docker%20Validation/badge.svg)
+
 Simple Python script to monitor Cloudflare edge locations and send Slack alerts when status changes (e.g. outage, maintenance, degraded performance).
 
 ---
@@ -51,10 +54,57 @@ docker compose logs -f
 ## 📁 Files
 
 - `cloudflare_monitor.py` — main script
+- `incident_monitor.py` — global incident monitor
+- `notifications.py` — shared notification functions
 - `Dockerfile` — lightweight image
 - `docker-compose.yml` — ready-to-run config
-- `requirements.txt` — only `requests`
+- `requirements.txt` — production dependencies
+- `requirements-dev.txt` — development dependencies
+- `pyproject.toml` — project configuration
 - `.env` — configuration
+
+---
+
+## 🔧 Development
+
+### Code Quality & CI/CD
+
+This project uses automated workflows to ensure code quality:
+
+- **CI Pipeline**: Linting, formatting, type checking, and security scanning
+- **Docker Validation**: Dockerfile and docker-compose validation
+- **Release Pipeline**: Automated releases (disabled by default)
+
+### Development Setup
+
+```bash
+# Clone repository
+git clone https://github.com/dendi-pradigta/cloudflare-monitor.git
+cd cloudflare-monitor
+
+# Install development dependencies
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+
+# Run linting
+ruff check .
+
+# Format code
+ruff format .
+
+# Type checking
+mypy .
+
+# Security scanning
+bandit -r .
+safety check
+```
+
+### Workflow Triggers
+
+- **Push/Pull Request**: Automatic CI and Docker validation
+- **Manual Dispatch**: Run workflows manually for testing
+- **Release**: Manual release workflow (enable when needed)
 
 ---
 
