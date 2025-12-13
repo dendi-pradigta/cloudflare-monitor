@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.3'
 
 services:
   location-monitor:
@@ -9,6 +9,9 @@ services:
     volumes:
       - ./data:/app/data
     restart: unless-stopped
+    user: "${UID:-0}:${GID:-0}"
+    security_opt:
+      - no-new-privileges:true
 
   incident-monitor:
     build: .
@@ -18,3 +21,6 @@ services:
     volumes:
       - ./data:/app/data
     restart: unless-stopped
+    user: "${UID:-0}:${GID:-0}"
+    security_opt:
+      - no-new-privileges:true

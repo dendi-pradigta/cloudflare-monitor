@@ -134,7 +134,7 @@ def send_opsgenie_alert(alias: str, message: str, description: str, status: str,
     # If status is considered "resolved", we close existing alert.
     if status in ['operational', 'resolved']:
         url = f"{OPSGENIE_API_URL}/v2/alerts/{alias}/close?identifierType=alias"
-        payload = {"note": f"Status kembali normal: {status.title()}"}
+        payload = {"note": f"Status returned to normal: {status.title()}"}
         log_message = f"Closing Opsgenie alert with alias: {alias}"
     else:
         # If there's a problem, we create or update alert.
@@ -172,3 +172,63 @@ def send_opsgenie_alert(alias: str, message: str, description: str, status: str,
         logging.error(f"Error calling Opsgenie API for alias {alias}: {e}")
         if e.response:
             logging.error(f"Opsgenie Response Body: {e.response.text}")
+
+
+def send_restart_summary_notification(differences, monitor_type, last_statuses):
+    """Send summary notification for restart sync"""
+    if not slack_client:
+        return
+    
+    channels = get_all_bot_channels()
+    if not channels:
+        logging.warning("No channels found for restart summary notification")
+        return
+    
+    # Build summary text
+    summary_lines = []
+    for diff in differences:
+        from_label = STATUS_LABEL.get(diff['from_status'], diff['from_status']) if diff['from_status'] != "unknown" else "Not tracked"
+        to_label = STATUS_LABEL.get(diff['to_status'], diff['to_status'])
+        
+        emoji_from = STATUS_EMOJI.get(diff['from_status'], "") if diff['from_status'] != "unknown" else "❓"
+        emoji_to = STATUS_EMOJI.get(diff['to_status'], "")
+        
+        summary_lines.append(f"• {diff['location']}: {emoji_from} {from_label} → {emoji_to} {to_label}")
+    
+    # Create summary blocks
+    blocks = [
+        {"type": "header", "text": {"type": "plain_text", "text": f":cloudflare: Cloudflare Status Sync on Restart", "emoji": True}},
+        {"type": "section", "text": {"type": "mrkdwn", "text": f"*Status synchronized after restart ({monitor_type} monitor)*\n\nFound {len(differences)} differences:"}},
+        {"type": "section", "text": {"type": "mrkdwn", "text": "\n".join(summary_lines)}},
+        {"type": "context", "elements": [{"type": "mrkdwn", "text": f"Cloudflare Monitor | Auto-sync on startup | {len(differences)} items updated"}]}
+    ]
+    
+    # Send to all channels
+    success_count = 0
+    for channel_id in channels:
+        try:
+            slack_client.chat_postMessage(
+                channel=channel_id,
+                blocks=blocks,
+                text=f"Cloudflare Status Sync: {len(differences)} differences found on restart"
+            )
+            success_count += 1
+        except Exception as e:
+            logging.error(f"Failed to send restart summary to {channel_id}: {e}")
+    
+    logging.info(f"Restart summary sent: {len(differences)} differences | Success: {success_count}, Failed: {len(channels)-success_count}")
+    
+    # Send Opsgenie summary if enabled
+    if OPSGENIE_ENABLED and OPSGENIE_API_KEY:
+        try:
+            opsgenie_description = f"Restart sync completed for {monitor_type} monitor.\n\n{len(differences)} differences found:\n" + "\n".join(summary_lines)
+            
+            send_opsgenie_alert(
+                alias=f"cf-restart-sync-{monitor_type}",
+                message=f"Cloudflare Status Sync on Restart ({monitor_type})",
+                description=opsgenie_description,
+                status="investigating",  # Use investigating status for sync operations
+                tags=["cloudflare", "restart-sync", monitor_type]
+            )
+        except Exception as e:
+            logging.error(f"Failed to send Opsgenie restart summary: {e}")

@@ -114,7 +114,7 @@ def main():
                     opsgenie_alias = f"cf-incident-{inc_id}"
                     opsgenie_message = f"Cloudflare Incident: {incident['name']} [{impact.upper()}]"
                     opsgenie_description = f"Incident '{incident['name']}' status has changed to {current_status}.\nImpact: {impact}\nComponents: {component_names}\nLink: {incident_url}"
-                    notifications.send_opsgenie_alert(alias=opsgenie_alias, message=opsgenie_message, description=opsgenie_description, status=impact if impact != 'unknown' else current_status, tags=["cloudflare", "incident-monitor", impact])
+                    notifications.send_opsgenie_alert(alias=opsgenie_alias, message=opsgenie_message, description=opsgenie_description, status=current_status, tags=["cloudflare", "incident-monitor", impact])
                     
                     last_incident_statuses[inc_id] = current_status
 
@@ -128,7 +128,13 @@ def main():
                     del last_incident_statuses[inc_id]
                     # Send closure notification to Opsgenie
                     opsgenie_alias = f"cf-incident-{inc_id}"
-                    notifications.send_opsgenie_alert(alias=opsgenie_alias, message="", description="", status="resolved", tags=[])
+                    notifications.send_opsgenie_alert(
+                        alias=opsgenie_alias, 
+                        message=f"Cloudflare Incident {inc_id} Resolved", 
+                        description=f"Incident {inc_id} has been resolved and is no longer active", 
+                        status="resolved", 
+                        tags=["cloudflare", "incident-resolved"]
+                    )
 
             save_last_statuses()
 
