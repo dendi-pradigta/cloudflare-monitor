@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
@@ -7,5 +7,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Secara default, Docker akan menjalankan command dari docker-compose.yml
+# By default, Docker will run the command from docker-compose.yml
 # CMD ["python3", "cloudflare_monitor.py"]
