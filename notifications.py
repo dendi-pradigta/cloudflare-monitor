@@ -13,7 +13,7 @@ OPSGENIE_ENABLED = os.getenv("OPSGENIE_ENABLED", "false").lower() == "true"
 OPSGENIE_API_KEY = os.getenv("OPSGENIE_API_KEY", "").strip()
 OPSGENIE_API_URL = os.getenv("OPSGENIE_API_URL", "https://api.opsgenie.com").strip()
 
-# Inisialisasi Slack Client
+# Initialize Slack Client
 slack_client = WebClient(token=SLACK_BOT_TOKEN) if SLACK_BOT_TOKEN else None
 
 # Status Mappings
@@ -22,7 +22,7 @@ STATUS_EMOJI = { "operational": ":white_check_mark:", "partial_outage": ":warnin
 
 def get_all_bot_channels():
     """
-    Mengambil semua channel (public & private) dimana bot adalah member.
+    Get all channels (public & private) where bot is a member.
     Returns: list of channel IDs
     """
     if not slack_client:
@@ -30,21 +30,21 @@ def get_all_bot_channels():
     
     all_channels = []
     try:
-        # Ambil public channels
+        # Get public channels
         public_response = slack_client.conversations_list(
             types="public_channel",
             exclude_archived=True,
             limit=200
         )
         
-        # Ambil private channels
+        # Get private channels
         private_response = slack_client.conversations_list(
             types="private_channel",
             exclude_archived=True,
             limit=200
         )
         
-        # Filter hanya channel dimana bot adalah member
+        # Filter only channels where bot is a member
         for channel in public_response.get("channels", []):
             if channel.get("is_member"):
                 all_channels.append(channel["id"])
@@ -62,16 +62,16 @@ def get_all_bot_channels():
 
 def send_slack_alert(title: str, fields: list, status: str, link: str = "https://www.cloudflarestatus.com"):
     """
-    Mengirim alert Slack ke semua channel dimana bot adalah member.
-    - title: Judul utama alert
-    - fields: List of dictionaries untuk section fields
-    - status: Status string untuk menentukan warna dan emoji
-    - link: URL untuk dilihat di footer
+    Send Slack alert to all channels where bot is a member.
+    - title: Main alert title
+    - fields: List of dictionaries for section fields
+    - status: Status string to determine color and emoji
+    - link: URL to display in footer
     """
     if not slack_client:
         return
 
-    # Dapatkan semua channel dimana bot adalah member
+    # Get all channels where bot is a member
     channels = get_all_bot_channels()
     
     if not channels:
@@ -81,13 +81,13 @@ def send_slack_alert(title: str, fields: list, status: str, link: str = "https:/
     label = STATUS_LABEL.get(status, status.replace("_", " ").title())
     emoji = STATUS_EMOJI.get(status, ":question:")
     
-    color = "#2eb886"  # Hijau untuk operational/resolved
+    color = "#2eb886"  # Green for operational/resolved
     if status in ["partial_outage", "degraded_performance", "under_maintenance", "investigating", "identified", "monitoring"]:
-        color = "#daa038"  # Kuning
+        color = "#daa038"  # Yellow
     elif status in ["major_outage"]:
-        color = "#a30200"  # Merah
+        color = "#a30200"  # Red
 
-    # Membuat fields untuk Slack blocks
+    # Create fields for Slack blocks
     mrkdwn_fields = []
     for field in fields:
         mrkdwn_fields.append({"type": "mrkdwn", "text": f"*{field['title']}:*\n{field['value']}"})
@@ -99,7 +99,7 @@ def send_slack_alert(title: str, fields: list, status: str, link: str = "https:/
         {"type": "context", "elements": [{"type": "mrkdwn", "text": f"Cloudflare Monitor | <{link}|View Details>"}]}
     ]
 
-    # Kirim ke semua channel dengan delay untuk rate limiting
+    # Send to all channels with delay for rate limiting
     success_count = 0
     failed_count = 0
     
@@ -113,47 +113,47 @@ def send_slack_alert(title: str, fields: list, status: str, link: str = "https:/
             success_count += 1
             logging.debug(f"Slack notification sent to channel {channel_id}")
             
-            # Delay 1 detik antar message untuk avoid rate limiting
+            # Delay 1 second between messages to avoid rate limiting
             time.sleep(1)
             
         except Exception as e:
             failed_count += 1
             logging.warning(f"Failed to send Slack notification to channel {channel_id}: {e}")
-            # Skip channel ini dan lanjut ke channel berikutnya
+            # Skip this channel and continue to next channel
             continue
     
     logging.info(f"Slack notification sent: {title} - {label} | Success: {success_count}, Failed: {failed_count}")
 
 def send_opsgenie_alert(alias: str, message: str, description: str, status: str, tags: list):
-    """Membuat atau menutup alert di Opsgenie."""
+    """Create or close alert in Opsgenie."""
     if not OPSGENIE_ENABLED or not OPSGENIE_API_KEY:
         if OPSGENIE_ENABLED:
             logging.warning("Opsgenie enabled but API Key is missing.")
         return
 
-    # Jika status dianggap "selesai", kita tutup alert yang ada.
+    # If status is considered "resolved", we close existing alert.
     if status in ['operational', 'resolved']:
         url = f"{OPSGENIE_API_URL}/v2/alerts/{alias}/close?identifierType=alias"
         payload = {"note": f"Status kembali normal: {status.title()}"}
         log_message = f"Closing Opsgenie alert with alias: {alias}"
     else:
-        # Jika ada masalah, kita buat atau perbarui alert.
+        # If there's a problem, we create or update alert.
         url = f"{OPSGENIE_API_URL}/v2/alerts"
         priority_map = {
-            "critical": "P1", # Untuk Insiden
-            "major_outage": "P1", # Untuk Komponen
-            "major": "P2", # Untuk Insiden
-            "partial_outage": "P2", # Untuk Komponen
-            "minor": "P3", # Untuk Insiden
-            "degraded_performance": "P3", # Untuk Komponen
+            "critical": "P1", # For Incidents
+            "major_outage": "P1", # For Components
+            "major": "P2", # For Incidents
+            "partial_outage": "P2", # For Components
+            "minor": "P3", # For Incidents
+            "degraded_performance": "P3", # For Components
             "under_maintenance": "P5",
         }
-        # Gunakan 'status' untuk insiden (critical, major, minor), atau status komponen untuk PoP.
+        # Use 'status' for incidents (critical, major, minor), or component status for PoP.
         payload = {
             "message": message,
             "alias": alias,
             "description": description,
-            "priority": priority_map.get(status, "P4"), # Default ke P4 jika tidak ada di map
+            "priority": priority_map.get(status, "P4"), # Default to P4 if not in map
             "tags": tags
         }
         log_message = f"Creating/updating Opsgenie alert for alias {alias} with priority {payload['priority']}"

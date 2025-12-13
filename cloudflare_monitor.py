@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# cloudflare_monitor.py (Diperbaiki)
+# cloudflare_monitor.py (Fixed)
 
 import requests
 import time
@@ -9,7 +9,7 @@ import sys
 import json
 import signal
 
-# Impor dari file notifikasi shared
+# Import from shared notification file
 import notifications
 
 # ========================
@@ -63,19 +63,19 @@ def fetch_components():
         logging.exception(f"Failed to fetch Cloudflare status: {e}")
         return []
 
-# ==> [PERBAIKAN] Fungsi ini telah diperbaiki <==
+# ==> [FIX] This function has been fixed <==
 def find_matching_components(components, targets):
     matches = {}
     for comp in components:
         name_lower = comp.get("name", "").lower()
 
-        # BARIS YANG MENYEBABKAN ERROR TELAH DIHAPUS DARI SINI
+        # ERROR-CAUSING LINE HAS BEEN REMOVED FROM HERE
         
         for target in targets:
-            # Cari nama target di dalam nama komponen, misal "jakarta" di "Jakarta, Indonesia"
+            # Search for target name within component name, e.g. "jakarta" in "Jakarta, Indonesia"
             if target in name_lower:
                 matches[target] = {"component_name": comp.get("name"), "status": comp.get("status")}
-                # Setelah match, lanjut ke komponen berikutnya
+                # After match, continue to next component
                 break 
     return matches
 
@@ -84,7 +84,7 @@ def graceful_shutdown(sig, frame):
     sys.exit(0)
 
 # ========================
-# मुख्य LOOP
+# MAIN LOOP
 # ========================
 
 def main():
@@ -112,14 +112,14 @@ def main():
                     label = STATUS_LABEL.get(data["status"], data["status"])
                     logging.info(f"🔔 STATUS CHANGE: {loc.title()} → {label} (Component: {data['component_name']})")
                     
-                    # Kirim Slack Alert
+                    # Send Slack Alert
                     slack_fields = [{"title": "Location", "value": loc.title()}, {"title": "Component", "value": data['component_name']}]
                     notifications.send_slack_alert(title="Cloudflare Location Status Update", fields=slack_fields, status=data["status"])
                     
-                    # Kirim Opsgenie Alert
+                    # Send Opsgenie Alert
                     opsgenie_alias = f"cf-loc-{loc}"
                     opsgenie_message = f"Cloudflare Status: {loc.title()} is {label}"
-                    opsgenie_desc = f"Status komponen '{data['component_name']}' telah berubah menjadi '{label}'."
+                    opsgenie_desc = f"Component '{data['component_name']}' status has changed to '{label}'."
                     notifications.send_opsgenie_alert(alias=opsgenie_alias, message=opsgenie_message, description=opsgenie_desc, status=data["status"], tags=["cloudflare", "location-monitor", loc])
                     
                     last_statuses[loc] = data["status"]
