@@ -93,7 +93,7 @@ def send_slack_alert(title: str, fields: list, status: str, link: str = "https:/
         mrkdwn_fields.append({"type": "mrkdwn", "text": f"*{field['title']}:*\n{field['value']}"})
 
     blocks = [
-        {"type": "header", "text": {"type": "plain_text", "text": f":cloudflare: {title}", "emoji": True}},
+        {"type": "header", "text": {"type": "plain_text", "text": f":earth_asia: {title}", "emoji": True}},
         {"type": "section", "fields": mrkdwn_fields},
         {"type": "section", "text": {"type": "mrkdwn", "text": f"*{emoji} Status changed to {label}*"}},
         {"type": "context", "elements": [{"type": "mrkdwn", "text": f"Cloudflare Monitor | <{link}|View Details>"}]}
@@ -197,7 +197,7 @@ def send_restart_summary_notification(differences, monitor_type, last_statuses):
     
     # Create summary blocks
     blocks = [
-        {"type": "header", "text": {"type": "plain_text", "text": f":cloudflare: Cloudflare Status Sync on Restart", "emoji": True}},
+        {"type": "header", "text": {"type": "plain_text", "text": f":earth_asia: Cloudflare Status Sync on Restart", "emoji": True}},
         {"type": "section", "text": {"type": "mrkdwn", "text": f"*Status synchronized after restart ({monitor_type} monitor)*\n\nFound {len(differences)} differences:"}},
         {"type": "section", "text": {"type": "mrkdwn", "text": "\n".join(summary_lines)}},
         {"type": "context", "elements": [{"type": "mrkdwn", "text": f"Cloudflare Monitor | Auto-sync on startup | {len(differences)} items updated"}]}
