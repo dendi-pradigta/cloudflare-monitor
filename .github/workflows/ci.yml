@@ -49,7 +49,7 @@ jobs:
         run: trufflehog --json . > trufflehog-report.json || true
         
       - name: Upload security reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: security-reports
