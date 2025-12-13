@@ -9,16 +9,16 @@ import sys
 import json
 import signal
 
-# Impor fungsi notifikasi dari file shared
+# Import notification functions from shared file
 import notifications
 
 # ========================
 # 🔧 CONFIGURATION
 # ========================
-# ==> [PERUBAHAN 1] Mengganti URL ke endpoint yang valid <==
+# ==> [CHANGE 1] Replaced URL with valid endpoint <==
 INCIDENTS_URL = os.getenv(
     "INCIDENTS_URL",
-    "https://www.cloudflarestatus.com/api/v2/incidents.json"  # <-- URL DIPERBAIKI
+    "https://www.cloudflarestatus.com/api/v2/incidents.json"  # <-- URL FIXED
 ).strip()
 SLEEP_INTERVAL = int(os.getenv("SLEEP_INTERVAL", "60"))
 STATUS_FILE = os.getenv("INCIDENT_STATUS_FILE", "data/last_incidents.json")
@@ -28,7 +28,7 @@ LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 logging.basicConfig(level=LOG_LEVEL, format='%(asctime)s - %(levelname)s - (IncidentMonitor) - %(message)s', stream=sys.stdout)
 HEADERS = {"User-Agent": "CloudflareIncidentMonitor/1.0"}
 
-# Dictionary untuk menyimpan status insiden terakhir yg diketahui
+# Dictionary to store last known incident status
 last_incident_statuses = {}
 
 # ========================
@@ -50,9 +50,9 @@ def save_last_statuses():
         with open(STATUS_FILE, "w") as f: json.dump(last_incident_statuses, f)
     except IOError as e: logging.error(f"Failed to save incident status file: {e}")
 
-# ==> [PERUBAHAN 2] Nama fungsi diubah agar lebih akurat <==
+# ==> [CHANGE 2] Function name changed for better accuracy <==
 def fetch_incidents():
-    """Mengambil insiden terbaru dari API Cloudflare."""
+    """Fetch latest incidents from Cloudflare API."""
     try:
         response = requests.get(INCIDENTS_URL, headers=HEADERS, timeout=15)
         response.raise_for_status()
@@ -68,7 +68,7 @@ def graceful_shutdown(sig, frame):
     sys.exit(0)
 
 # ========================
-#  मुख्य LOOP
+# MAIN LOOP
 # ========================
 
 def main():
@@ -77,26 +77,26 @@ def main():
 
     logging.info(f"🚀 Starting Cloudflare Incident Monitor...")
     if notifications.slack_client:
-        logging.info("slack: Incident notifications enabled")
+        logging.info("slack: Incident notifications enabled (broadcasting to all bot channels)")
     if notifications.OPSGENIE_ENABLED:
         logging.info("opsgenie: Incident notifications enabled")
 
     while True:
         try:
             logging.info("🔄 Checking for new or updated incidents...")
-            all_incidents = fetch_incidents() # Mengambil semua insiden
+            all_incidents = fetch_incidents() # Fetch all incidents
             if not all_incidents:
                 time.sleep(SLEEP_INTERVAL)
                 continue
 
-            # ==> [PERUBAHAN 3] Filter hanya insiden yang BELUM selesai <==
+            # ==> [CHANGE 3] Filter only incidents that are NOT resolved <==
             unresolved_incidents = [
                 inc for inc in all_incidents if inc.get('status') != 'resolved'
             ]
             
             current_incident_ids = {inc['id']: inc for inc in unresolved_incidents}
 
-            # 1. Periksa insiden baru atau yang statusnya berubah
+            # 1. Check for new incidents or status changes
             for inc_id, incident in current_incident_ids.items():
                 last_status = last_incident_statuses.get(inc_id)
                 current_status = incident['status']
@@ -114,21 +114,27 @@ def main():
                     opsgenie_alias = f"cf-incident-{inc_id}"
                     opsgenie_message = f"Cloudflare Incident: {incident['name']} [{impact.upper()}]"
                     opsgenie_description = f"Incident '{incident['name']}' status has changed to {current_status}.\nImpact: {impact}\nComponents: {component_names}\nLink: {incident_url}"
-                    notifications.send_opsgenie_alert(alias=opsgenie_alias, message=opsgenie_message, description=opsgenie_description, status=impact if impact != 'unknown' else current_status, tags=["cloudflare", "incident-monitor", impact])
+                    notifications.send_opsgenie_alert(alias=opsgenie_alias, message=opsgenie_message, description=opsgenie_description, status=current_status, tags=["cloudflare", "incident-monitor", impact])
                     
                     last_incident_statuses[inc_id] = current_status
 
-            # 2. Periksa insiden yang telah diselesaikan (resolved)
+            # 2. Check for resolved incidents
             resolved_ids = set(last_incident_statuses.keys()) - set(current_incident_ids.keys())
             for inc_id in resolved_ids:
-                # Cek dulu apakah id ini memang ada di state kita
+                # First check if this ID exists in our state
                 if inc_id in last_incident_statuses:
                     logging.info(f"✅ INCIDENT RESOLVED: ID {inc_id} has been resolved and removed from the unresolved list.")
-                    # Hapus dari state kita
+                    # Remove from our state
                     del last_incident_statuses[inc_id]
-                    # Kirim notifikasi penutupan ke Opsgenie
+                    # Send closure notification to Opsgenie
                     opsgenie_alias = f"cf-incident-{inc_id}"
-                    notifications.send_opsgenie_alert(alias=opsgenie_alias, message="", description="", status="resolved", tags=[])
+                    notifications.send_opsgenie_alert(
+                        alias=opsgenie_alias, 
+                        message=f"Cloudflare Incident {inc_id} Resolved", 
+                        description=f"Incident {inc_id} has been resolved and is no longer active", 
+                        status="resolved", 
+                        tags=["cloudflare", "incident-resolved"]
+                    )
 
             save_last_statuses()
 
