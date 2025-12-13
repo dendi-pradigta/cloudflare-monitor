@@ -82,9 +82,9 @@ def send_slack_alert(title: str, fields: list, status: str, link: str = "https:/
     emoji = STATUS_EMOJI.get(status, ":question:")
     
     color = "#2eb886"  # Green for operational/resolved
-    if status in ["partial_outage", "degraded_performance", "under_maintenance", "investigating", "identified", "monitoring"]:
+    if status in ["partial_outage", "under_maintenance", "investigating", "identified", "monitoring"]:
         color = "#daa038"  # Yellow
-    elif status in ["major_outage"]:
+    elif status in ["major_outage", "degraded_performance"]:
         color = "#a30200"  # Red
 
     # Create fields for Slack blocks
