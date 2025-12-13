@@ -1,0 +1,13 @@
+# Development Dependencies for Cloudflare Monitor
+# Install with: pip install -r requirements-dev.txt
+
+# Code Quality & Formatting
+ruff>=0.1.0
+
+# Type Checking
+mypy>=1.0.0
+
+# Security Scanning
+safety>=2.0.0
+bandit>=1.7.0
+trufflehog>=3.0.0

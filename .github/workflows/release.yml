@@ -1,0 +1,133 @@
+name: Release Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v0.0.3)'
+        required: true
+        default: 'v0.0.3'
+      create_tag:
+        description: 'Create Git tag'
+        required: true
+        default: true
+        type: boolean
+      build_docker:
+        description: 'Build and push Docker image'
+        required: true
+        default: false
+        type: boolean
+
+# This workflow is disabled by default
+# Set 'if: false' to 'if: true()' to enable
+jobs:
+  release:
+    if: false  # Disabled by default - change to true() to enable
+    runs-on: ubuntu-latest
+    name: Create Release
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Validate version format
+        run: |
+          if [[ ! "${{ github.event.inputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Version must be in format v0.0.0"
+            exit 1
+          fi
+          
+      - name: Create Git tag
+        if: github.event.inputs.create_tag == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git tag -a "${{ github.event.inputs.version }}" -m "Release ${{ github.event.inputs.version }}"
+          git push origin "${{ github.event.inputs.version }}"
+          
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+          
+          if [ -n "$PREV_TAG" ]; then
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" $PREV_TAG..HEAD)
+          else
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)")
+          fi
+          
+          # Save to file for GitHub release
+          echo "$CHANGELOG" > changelog.md
+          
+          # Set output for later steps
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          release_name: Release ${{ github.event.inputs.version }}
+          body: |
+            ## Changes in ${{ github.event.inputs.version }}
+            
+            ${{ steps.changelog.outputs.changelog }}
+            
+            ---
+            
+            ### Installation
+            
+            ```bash
+            git clone https://github.com/dendi-pradigta/cloudflare-monitor.git
+            cd cloudflare-monitor
+            git checkout ${{ github.event.inputs.version }}
+            ```
+            
+            ### Docker
+            
+            ```bash
+            docker compose up -d
+            ```
+          draft: false
+          prerelease: false
+          
+      - name: Set up Docker Buildx
+        if: github.event.inputs.build_docker == 'true'
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Login to Docker Hub
+        if: github.event.inputs.build_docker == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          
+      - name: Build and push Docker image
+        if: github.event.inputs.build_docker == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            dendi/cloudflare-monitor:latest
+            dendi/cloudflare-monitor:${{ github.event.inputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          
+      - name: Update version in pyproject.toml
+        run: |
+          # Update version in pyproject.toml
+          sed -i "s/version = \".*\"/version = \"${{ github.event.inputs.version }}\"/" pyproject.toml
+          
+          # Commit version update
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add pyproject.toml
+          git commit -m "chore: update version to ${{ github.event.inputs.version }}"
+          git push
