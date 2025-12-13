@@ -1,24 +1,26 @@
+version: '3.3'
+
 services:
   location_monitor:
-    image: cloudflare-monitor-location_monitor:beta-01
+    build: .
     command: python3 cloudflare_monitor.py
     env_file:
       - .env
     volumes:
-      - ./data:/app/data
+      - ./data:/app/data:rw
     restart: unless-stopped
-    user: "0:0"
+    user: "1001:1001"
     security_opt:
       - no-new-privileges:true
 
   incident_monitor:
-    image: cloudflare-monitor-incident_monitor:beta-01
+    build: .
     command: python3 incident_monitor.py
     env_file:
       - .env
     volumes:
-      - ./data:/app/data
+      - ./data:/app/data:rw
     restart: unless-stopped
-    user: "0:0"
+    user: "1001:1001"
     security_opt:
       - no-new-privileges:true

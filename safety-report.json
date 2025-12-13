@@ -35,8 +35,8 @@ We highly encourage switching to the new `scan` command which is easier to use, 
         "account": "",
         "local_database_path": null,
         "safety_version": "3.7.0",
-        "timestamp": "2025-12-13 09:17:49",
-        "packages_found": 134,
+        "timestamp": "2025-12-13 09:37:50",
+        "packages_found": 137,
         "vulnerabilities_found": 52,
         "vulnerabilities_ignored": 0,
         "remediations_recommended": 0,
@@ -57,7 +57,7 @@ We highly encourage switching to the new `scan` command which is easier to use, 
         "git": {
             "branch": "feature/github-workflows",
             "tag": "",
-            "commit": "e020db3fb789e1a51eb2b1478545f97fcdcb7eb7",
+            "commit": "81c606eb95b81bea8f7fe741b3fcb5fcda5d5101",
             "dirty": "True",
             "origin": "git@github.com:dendi-pradigta/cloudflare-monitor.git"
         },
@@ -638,6 +638,21 @@ We highly encourage switching to the new `scan` command which is easier to use, 
                 }
             ]
         },
+        "pluggy": {
+            "name": "pluggy",
+            "version": "1.6.0",
+            "requirements": [
+                {
+                    "raw": "pluggy==1.6.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pluggy",
+                    "specifier": "==1.6.0",
+                    "url": null,
+                    "found": "/home/dendi/.local/lib/python3.10/site-packages/pluggy-1.6.0.dist-info"
+                }
+            ]
+        },
         "mdurl": {
             "name": "mdurl",
             "version": "0.1.2",
@@ -743,6 +758,21 @@ We highly encourage switching to the new `scan` command which is easier to use, 
                 }
             ]
         },
+        "iniconfig": {
+            "name": "iniconfig",
+            "version": "2.3.0",
+            "requirements": [
+                {
+                    "raw": "iniconfig==2.3.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "iniconfig",
+                    "specifier": "==2.3.0",
+                    "url": null,
+                    "found": "/home/dendi/.local/lib/python3.10/site-packages/iniconfig-2.3.0.dist-info"
+                }
+            ]
+        },
         "Authlib": {
             "name": "Authlib",
             "version": "1.6.6",
@@ -755,6 +785,21 @@ We highly encourage switching to the new `scan` command which is easier to use, 
                     "specifier": "==1.6.6",
                     "url": null,
                     "found": "/home/dendi/.local/lib/python3.10/site-packages/authlib-1.6.6.dist-info"
+                }
+            ]
+        },
+        "pytest": {
+            "name": "pytest",
+            "version": "9.0.2",
+            "requirements": [
+                {
+                    "raw": "pytest==9.0.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pytest",
+                    "specifier": "==9.0.2",
+                    "url": null,
+                    "found": "/home/dendi/.local/lib/python3.10/site-packages/pytest-9.0.2.dist-info"
                 }
             ]
         },

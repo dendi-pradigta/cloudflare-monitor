@@ -1,10 +1,11 @@
 # notifications.py
-import os
 import logging
-import requests
+import os
 import time
+from typing import Any
+
+import requests
 from slack_sdk import WebClient
-from typing import Optional, List, Dict, Any
 
 # ========================
 # 🔧 CONFIGURATION
@@ -180,7 +181,7 @@ def send_slack_alert(
 
 
 def send_opsgenie_alert(
-    alias: str, message: str, description: str, status: str, tags: list
+    alias: str, message: str, description: str, status: str, tags: list[str]
 ):
     """Create or close alert in Opsgenie."""
     if not OPSGENIE_ENABLED or not OPSGENIE_API_KEY:
@@ -188,10 +189,13 @@ def send_opsgenie_alert(
             logging.warning("Opsgenie enabled but API Key is missing.")
         return
 
+    # Initialize variables
+    request_payload: dict[str, Any]
+
     # If status is considered "resolved", we close existing alert.
     if status in ["operational", "resolved"]:
         url = f"{OPSGENIE_API_URL}/v2/alerts/{alias}/close?identifierType=alias"
-        close_close_payload = {"note": f"Status returned to normal: {status.title()}"}
+        request_payload = {"note": f"Status returned to normal: {status.title()}"}
         log_message = f"Closing Opsgenie alert with alias: {alias}"
     else:
         # If there's a problem, we create or update alert.
@@ -206,14 +210,14 @@ def send_opsgenie_alert(
             "under_maintenance": "P5",
         }
         # Use 'status' for incidents (critical, major, minor), or component status for PoP.
-        payload: Dict[str, Any] = {
+        request_payload = {
             "message": message,
             "alias": alias,
             "description": description,
             "priority": priority_map.get(status, "P4"),  # Default to P4 if not in map
             "tags": tags,
         }
-        log_message = f"Creating/updating Opsgenie alert for alias {alias} with priority {payload['priority']}"
+        log_message = f"Creating/updating Opsgenie alert for alias {alias} with priority {request_payload['priority']}"
 
     headers = {
         "Content-Type": "application/json",
@@ -222,7 +226,7 @@ def send_opsgenie_alert(
 
     try:
         logging.info(log_message)
-        response = requests.post(url, headers=headers, json=payload, timeout=10)
+        response = requests.post(url, headers=headers, json=request_payload, timeout=10)
         response.raise_for_status()
         logging.info(
             f"Opsgenie API call successful for alias {alias}. Request ID: {response.json().get('requestId')}"
@@ -270,7 +274,7 @@ def send_restart_summary_notification(differences, monitor_type, last_statuses):
             "type": "header",
             "text": {
                 "type": "plain_text",
-                "text": f":earth_asia: Cloudflare Status Sync on Restart",
+                "text": ":earth_asia: Cloudflare Status Sync on Restart",
                 "emoji": True,
             },
         },

@@ -1,6 +1,6 @@
 {
   "errors": [],
-  "generated_at": "2025-12-13T09:17:24Z",
+  "generated_at": "2025-12-13T09:38:38Z",
   "metrics": {
     "./cloudflare_monitor.py": {
       "CONFIDENCE.HIGH": 0,
@@ -37,7 +37,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 271,
+      "loc": 272,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -50,7 +50,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 15,
+      "loc": 14,
       "nosec": 0,
       "skipped_tests": 0
     },
