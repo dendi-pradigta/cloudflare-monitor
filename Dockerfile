@@ -1,18 +1,11 @@
-# Gunakan image Python slim untuk ukuran kecil
-FROM python:3.11-slim
+FROM python:3.9-slim
 
-# Set working directory
 WORKDIR /app
 
-# Install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy script
-COPY cloudflare_monitor.py .
+COPY . .
 
-# Buat direktori untuk persistensi data
-RUN mkdir -p /data
-
-# Jalankan script
-CMD ["python", "cloudflare_monitor.py"]
+# Secara default, Docker akan menjalankan command dari docker-compose.yml
+# CMD ["python3", "cloudflare_monitor.py"]

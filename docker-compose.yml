@@ -1,25 +1,20 @@
 version: '3.8'
 
 services:
-  cloudflare-monitor:
+  location-monitor:
     build: .
-    container_name: cloudflare-monitor
+    command: python3 cloudflare_monitor.py
     env_file:
       - .env
     volumes:
-      - ./data:/data          # Persistensi status antar restart
-      # - ./logs:/data/logs           # (opsional) jika aktifkan file logging
+      - ./data:/app/data
     restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    healthcheck:
-      # Cek apakah file status telah dimodifikasi dalam 2 menit terakhir.
-      # Interval pengecekan kita 60 detik, jadi 2 menit adalah batas yang aman.
-      test: ["CMD", "find", "/data/last_statuses.json", "-mmin", "-2"]
-      interval: 60s
-      timeout: 5s
-      retries: 3
-      start_period: 20s
+
+  incident-monitor:
+    build: .
+    command: python3 incident_monitor.py
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
