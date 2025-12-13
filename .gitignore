@@ -44,6 +44,11 @@ Thumbs.db
 *.iml
 
 # ========================
+# Runtime data files
+# ========================
+data/*.json
+
+# ========================
 # Other
 # ========================
 # Ignore generated files (if you ever export logs or reports)
