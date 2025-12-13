@@ -10,4 +10,4 @@ mypy>=1.0.0
 # Security Scanning
 safety>=2.0.0
 bandit>=1.7.0
-trufflehog>=3.0.0
+trufflehog>=2.1.0
