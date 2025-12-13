@@ -77,7 +77,7 @@ def main():
 
     logging.info(f"🚀 Starting Cloudflare Incident Monitor...")
     if notifications.slack_client:
-        logging.info("slack: Incident notifications enabled")
+        logging.info("slack: Incident notifications enabled (broadcasting to all bot channels)")
     if notifications.OPSGENIE_ENABLED:
         logging.info("opsgenie: Incident notifications enabled")
 

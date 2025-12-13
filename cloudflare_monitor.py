@@ -92,7 +92,7 @@ def main():
     last_statuses = load_last_statuses()
 
     logging.info(f"🚀 Starting Cloudflare Location Monitor for: {', '.join(TARGET_LOCATIONS)}")
-    if notifications.slack_client: logging.info(f"slack: Location notifications enabled for channel '{notifications.SLACK_CHANNEL}'")
+    if notifications.slack_client: logging.info(f"slack: Location notifications enabled (broadcasting to all bot channels)")
     if notifications.OPSGENIE_ENABLED: logging.info(f"opsgenie: Location notifications enabled.")
 
     while True:

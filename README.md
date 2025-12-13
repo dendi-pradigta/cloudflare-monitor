@@ -21,12 +21,17 @@ Simple Python script to monitor Cloudflare edge locations and send Slack alerts 
 
 ```env
 TARGET_LOCATIONS=jakarta,singapore,tokyo,manila
-SLACK_WEBHOOK_URL=https://hooks.slack.com/services/XXX/YYY/ZZZ
+SLACK_BOT_TOKEN=xoxb-your-bot-token-here
 SLEEP_INTERVAL=60
 LOG_LEVEL=INFO
 ```
 
-> Get your Slack webhook from [Slack API](https://api.slack.com/messaging/webhooks)
+> **Slack Setup:**
+> 1. Create a Slack App at [Slack API](https://api.slack.com/apps)
+> 2. Add Bot Token Scopes: `channels:read`, `groups:read`, `chat:write`
+> 3. Install app to workspace and copy Bot User OAuth Token
+> 4. Invite bot to desired channels with `/invite @YourBotName`
+> 5. Bot will automatically send alerts to all channels where it's a member
 
 ### 2. Run with Docker Compose
 
