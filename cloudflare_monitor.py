@@ -40,14 +40,14 @@ logging.basicConfig(
 HEADERS = {"User-Agent": "CloudflareStatusMonitor/1.0"}
 
 STATUS_LABEL = notifications.STATUS_LABEL
-last_statuses = {}
+last_statuses: dict[str, str] = {}
 
 # ========================
 # 🛠 UTILS
 # ========================
 
 
-def load_last_statuses():
+def load_last_statuses() -> dict[str, str]:
     if os.path.exists(STATUS_FILE):
         try:
             with open(STATUS_FILE) as f:
@@ -67,7 +67,7 @@ def load_last_statuses():
     return {}
 
 
-def save_last_statuses():
+def save_last_statuses() -> None:
     dir_name = os.path.dirname(STATUS_FILE)
     if dir_name:
         os.makedirs(dir_name, exist_ok=True)
@@ -78,18 +78,20 @@ def save_last_statuses():
         logging.error(f"Failed to save status file: {e}")
 
 
-def fetch_components():
+def fetch_components() -> list[dict]:
     try:
         resp = requests.get(COMPONENTS_URL, headers=HEADERS, timeout=10)
         resp.raise_for_status()
-        return resp.json().get("components", [])
+        return resp.json().get("components", []) or []
     except Exception as e:
         logging.exception(f"Failed to fetch Cloudflare status: {e}")
         return []
 
 
 # ==> [FIX] This function has been fixed <==
-def find_matching_components(components, targets):
+def find_matching_components(
+    components: list[dict], targets: list[str]
+) -> dict[str, dict]:
     matches = {}
     for comp in components:
         name_lower = comp.get("name", "").lower()
@@ -108,7 +110,7 @@ def find_matching_components(components, targets):
     return matches
 
 
-def verify_status_on_restart():
+def verify_status_on_restart() -> None:
     """Compare saved vs current status and handle notifications based on NOTIFY_ON_RESTART"""
     global last_statuses
 
@@ -225,7 +227,7 @@ def verify_status_on_restart():
         logging.info("✅ Startup sync: No status differences found")
 
 
-def graceful_shutdown(sig, frame):
+def graceful_shutdown(sig: int, frame: object) -> None:
     logging.info(f"🛑 Received signal {sig}. Shutting down location monitor...")
     sys.exit(0)
 
@@ -235,7 +237,7 @@ def graceful_shutdown(sig, frame):
 # ========================
 
 
-def main():
+def main() -> None:
     global last_statuses
     last_statuses = load_last_statuses()
 

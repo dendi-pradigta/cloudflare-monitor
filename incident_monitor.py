@@ -34,18 +34,18 @@ logging.basicConfig(
 HEADERS = {"User-Agent": "CloudflareIncidentMonitor/1.0"}
 
 # Dictionary to store last known incident status
-last_incident_statuses = {}
+last_incident_statuses: dict[str, str] = {}
 
 # ========================
 # 🛠 UTILS
 # ========================
 
 
-def load_last_statuses():
+def load_last_statuses() -> dict[str, str]:
     if os.path.exists(STATUS_FILE):
         try:
             with open(STATUS_FILE) as f:
-                return json.load(f)
+                return json.load(f) or {}
         except (OSError, json.JSONDecodeError) as e:
             logging.warning(
                 f"Could not load incident status file '{STATUS_FILE}', starting fresh. Error: {e}"
@@ -53,7 +53,7 @@ def load_last_statuses():
     return {}
 
 
-def save_last_statuses():
+def save_last_statuses() -> None:
     dir_name = os.path.dirname(STATUS_FILE)
     if dir_name:
         os.makedirs(dir_name, exist_ok=True)
@@ -65,12 +65,12 @@ def save_last_statuses():
 
 
 # ==> [CHANGE 2] Function name changed for better accuracy <==
-def fetch_incidents():
+def fetch_incidents() -> list[dict]:
     """Fetch latest incidents from Cloudflare API."""
     try:
         response = requests.get(INCIDENTS_URL, headers=HEADERS, timeout=15)
         response.raise_for_status()
-        return response.json().get("incidents", [])
+        return response.json().get("incidents", []) or []
     except requests.exceptions.RequestException as e:
         logging.error(f"Failed to fetch Cloudflare incidents: {e}")
     except json.JSONDecodeError as e:
@@ -78,7 +78,7 @@ def fetch_incidents():
     return []
 
 
-def graceful_shutdown(sig, frame):
+def graceful_shutdown(sig: int, frame: object) -> None:
     logging.info(f"🛑 Received signal {sig}. Shutting down incident monitor...")
     sys.exit(0)
 
@@ -88,7 +88,7 @@ def graceful_shutdown(sig, frame):
 # ========================
 
 
-def main():
+def main() -> None:
     global last_incident_statuses
     last_incident_statuses = load_last_statuses()
 
