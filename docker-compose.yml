@@ -1,6 +1,6 @@
 services:
   location_monitor:
-    build: .
+    image: cloudflare-monitor-location_monitor:beta-01
     command: python3 cloudflare_monitor.py
     env_file:
       - .env
@@ -12,7 +12,7 @@ services:
       - no-new-privileges:true
 
   incident_monitor:
-    build: .
+    image: cloudflare-monitor-incident_monitor:beta-01
     command: python3 incident_monitor.py
     env_file:
       - .env

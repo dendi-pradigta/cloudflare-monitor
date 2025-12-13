@@ -16,14 +16,14 @@ We highly encourage switching to the new `scan` command which is easier to use, 
     "report_meta": {
         "scan_target": "environment",
         "scanned": [
-            "/usr/local/lib/python3.10/dist-packages",
             "/home/dendi/.local/lib/python3.10/site-packages",
+            "/usr/local/lib/python3.10/dist-packages",
             "/usr/lib/python3/dist-packages"
         ],
         "scanned_full_path": [
+            "/home/dendi/.local/lib/python3.10/site-packages",
             "/usr/local/lib/python3.10/dist-packages",
-            "/usr/lib/python3/dist-packages",
-            "/home/dendi/.local/lib/python3.10/site-packages"
+            "/usr/lib/python3/dist-packages"
         ],
         "target_languages": [
             "python"
@@ -35,9 +35,9 @@ We highly encourage switching to the new `scan` command which is easier to use, 
         "account": "",
         "local_database_path": null,
         "safety_version": "3.7.0",
-        "timestamp": "2025-12-13 07:15:01",
+        "timestamp": "2025-12-13 08:01:13",
         "packages_found": 134,
-        "vulnerabilities_found": 53,
+        "vulnerabilities_found": 52,
         "vulnerabilities_ignored": 0,
         "remediations_recommended": 0,
         "telemetry": {
@@ -57,7 +57,7 @@ We highly encourage switching to the new `scan` command which is easier to use, 
         "git": {
             "branch": "feature/github-workflows",
             "tag": "",
-            "commit": "8887d2840e2b3a6e2c104f88eab1f5fd4199c916",
+            "commit": "5de5e7437f352cd8ab19cd0077ab6045569c2ea2",
             "dirty": "True",
             "origin": "git@github.com:dendi-pradigta/cloudflare-monitor.git"
         },
@@ -698,6 +698,21 @@ We highly encourage switching to the new `scan` command which is easier to use, 
                 }
             ]
         },
+        "requests": {
+            "name": "requests",
+            "version": "2.25.1",
+            "requirements": [
+                {
+                    "raw": "requests==2.25.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "requests",
+                    "specifier": "==2.25.1",
+                    "url": null,
+                    "found": "/usr/lib/python3/dist-packages/requests-2.25.1.egg-info"
+                }
+            ]
+        },
         "dparse": {
             "name": "dparse",
             "version": "0.6.4",
@@ -800,21 +815,6 @@ We highly encourage switching to the new `scan` command which is easier to use, 
                     "specifier": "==0.2.15",
                     "url": null,
                     "found": "/home/dendi/.local/lib/python3.10/site-packages/ruamel_yaml_clib-0.2.15.dist-info"
-                }
-            ]
-        },
-        "requests": {
-            "name": "requests",
-            "version": "2.25.1",
-            "requirements": [
-                {
-                    "raw": "requests==2.25.1",
-                    "extras": [],
-                    "marker": null,
-                    "name": "requests",
-                    "specifier": "==2.25.1",
-                    "url": null,
-                    "found": "/usr/lib/python3/dist-packages/requests-2.25.1.egg-info"
                 }
             ]
         },
@@ -8322,39 +8322,6 @@ We highly encourage switching to the new `scan` command which is easier to use, 
             "more_info_url": "https://data.safetycli.com/v/77680/97c"
         },
         {
-            "vulnerability_id": "77680",
-            "package_name": "requests",
-            "ignored": {},
-            "ignored_reason": null,
-            "ignored_expires": null,
-            "vulnerable_spec": [
-                "<2.32.4"
-            ],
-            "all_vulnerable_specs": [
-                "<2.32.4"
-            ],
-            "analyzed_version": "2.32.3",
-            "analyzed_requirement": {
-                "raw": "requests==2.32.3",
-                "extras": [],
-                "marker": null,
-                "name": "requests",
-                "specifier": "==2.32.3",
-                "url": null,
-                "found": "/home/dendi/.local/lib/python3.10/site-packages/requests-2.32.3.dist-info"
-            },
-            "advisory": "Requests is an HTTP library. Due to a URL parsing issue, Requests releases prior to 2.32.4 may leak .netrc credentials to third parties for specific maliciously-crafted URLs. Users should upgrade to version 2.32.4 to receive a fix. For older versions of Requests, use of the .netrc file can be disabled with `trust_env=False` on one's Requests Session.",
-            "is_transitive": false,
-            "published_date": null,
-            "fixed_versions": [],
-            "closest_versions_without_known_vulnerabilities": [],
-            "resources": [],
-            "CVE": "CVE-2024-47081",
-            "severity": null,
-            "affected_versions": [],
-            "more_info_url": "https://data.safetycli.com/v/77680/97c"
-        },
-        {
             "vulnerability_id": "52322",
             "package_name": "gitpython",
             "ignored": {},
@@ -8825,7 +8792,7 @@ We highly encourage switching to the new `scan` command which is easier to use, 
                     "more_info_url": "https://data.safetycli.com/p/pypi/requests/97c/"
                 },
                 "==2.32.3": {
-                    "vulnerabilities_found": 2,
+                    "vulnerabilities_found": 1,
                     "version": "2.32.3",
                     "requirement": {
                         "raw": "requests==2.32.3",

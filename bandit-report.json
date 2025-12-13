@@ -1,6 +1,6 @@
 {
   "errors": [],
-  "generated_at": "2025-12-13T07:14:14Z",
+  "generated_at": "2025-12-13T08:01:01Z",
   "metrics": {
     "./cloudflare_monitor.py": {
       "CONFIDENCE.HIGH": 0,
@@ -11,7 +11,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 181,
+      "loc": 228,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -24,7 +24,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 101,
+      "loc": 143,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -37,7 +37,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 176,
+      "loc": 306,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -11581,7 +11581,7 @@
       "SEVERITY.LOW": 644,
       "SEVERITY.MEDIUM": 35,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 266051,
+      "loc": 266270,
       "nosec": 0,
       "skipped_tests": 0
     }
