@@ -1,7 +1,5 @@
-version: '3.3'
-
 services:
-  location-monitor:
+  location_monitor:
     build: .
     command: python3 cloudflare_monitor.py
     env_file:
@@ -9,11 +7,11 @@ services:
     volumes:
       - ./data:/app/data
     restart: unless-stopped
-    user: "${UID:-0}:${GID:-0}"
+    user: "0:0"
     security_opt:
       - no-new-privileges:true
 
-  incident-monitor:
+  incident_monitor:
     build: .
     command: python3 incident_monitor.py
     env_file:
@@ -21,6 +19,6 @@ services:
     volumes:
       - ./data:/app/data
     restart: unless-stopped
-    user: "${UID:-0}:${GID:-0}"
+    user: "0:0"
     security_opt:
       - no-new-privileges:true
