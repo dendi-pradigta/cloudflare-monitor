@@ -1,4 +1,6 @@
 # cloudflare_monitor package
-from .monitor import main as main
 from .incident import main as incident_main
-from .notifications import STATUS_LABEL, send_slack_alert
+from .monitor import main as main
+from .notifications import send_slack_alert, STATUS_LABEL
+
+__all__ = ["main", "incident_main", "send_slack_alert", "STATUS_LABEL"]
