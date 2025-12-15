@@ -1,0 +1,3 @@
+[console_scripts]
+cloudflare-monitor = cloudflare_monitor.monitor:main
+incident-monitor = cloudflare_monitor.incident:main
