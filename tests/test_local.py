@@ -247,7 +247,7 @@ def test_manual_notifications():
 docker-compose exec -T location_monitor python3 -c "
 import sys
 sys.path.insert(0, '/app')
-import notifications
+from cloudflare_monitor import notifications
 
 try:
     notifications.send_slack_alert(
@@ -281,7 +281,7 @@ except Exception as e:
 docker-compose exec -T incident_monitor python3 -c "
 import sys
 sys.path.insert(0, '/app')
-import notifications
+from cloudflare_monitor import notifications
 
 try:
     notifications.send_slack_alert(
@@ -322,7 +322,7 @@ def test_slack_integration():
 docker-compose exec -T incident_monitor python3 -c "
 import sys
 sys.path.insert(0, '/app')
-import notifications
+from cloudflare_monitor import notifications
 
 channels = notifications.get_all_bot_channels()
 print(f'📱 Bot is in {len(channels)} channels')
