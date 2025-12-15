@@ -11,7 +11,7 @@ import time
 import requests
 
 # Import from shared notification file
-from cloudflare_monitor import notifications
+from . import notifications
 
 # ========================
 # 🔧 CONFIGURATION
