@@ -53,9 +53,7 @@ docker compose logs -f
 
 ## 📁 Files
 
-- `cloudflare_monitor.py` — main script
-- `incident_monitor.py` — global incident monitor
-- `notifications.py` — shared notification functions
+- `src/cloudflare_monitor/` — Python package containing `monitor.py`, `incident.py`, and `notifications.py`
 - `Dockerfile` — lightweight image
 - `docker-compose.yml` — ready-to-run config
 - `requirements.txt` — production dependencies
