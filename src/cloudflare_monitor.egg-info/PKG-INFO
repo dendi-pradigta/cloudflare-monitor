@@ -1,3 +1,29 @@
+Metadata-Version: 2.4
+Name: cloudflare-monitor
+Version: 0.0.2
+Summary: Simple Python script to monitor Cloudflare edge locations and send alerts
+Author-email: Dendi Pradigta <dendi@example.com>
+License: MIT
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: System Administrators
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: python-dotenv>=1.2.1
+Requires-Dist: requests>=2.32.5
+Requires-Dist: slack_sdk>=3.37.0
+Provides-Extra: dev
+Requires-Dist: ruff>=0.1.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+Requires-Dist: safety>=2.0.0; extra == "dev"
+Requires-Dist: bandit>=1.7.0; extra == "dev"
+Requires-Dist: trufflehog>=2.1.0; extra == "dev"
+
 # Cloudflare Status Monitor
 
 ![CI Pipeline](https://github.com/dendi-pradigta/cloudflare-monitor/workflows/CI%20Pipeline/badge.svg)

@@ -3,7 +3,7 @@ version: '3.3'
 services:
   location_monitor:
     build: .
-    command: python3 cloudflare_monitor.py
+    command: python3 -m src.cloudflare_monitor.monitor
     env_file:
       - .env
     volumes:
@@ -15,7 +15,7 @@ services:
 
   incident_monitor:
     build: .
-    command: python3 incident_monitor.py
+    command: python3 -m src.cloudflare_monitor.incident
     env_file:
       - .env
     volumes:

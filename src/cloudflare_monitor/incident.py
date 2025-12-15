@@ -11,7 +11,7 @@ import time
 import requests
 
 # Import notification functions from shared file
-import notifications
+from . import notifications
 
 # ========================
 # 🔧 CONFIGURATION
