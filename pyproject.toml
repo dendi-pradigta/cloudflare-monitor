@@ -36,8 +36,11 @@ dev = [
 ]
 
 [project.scripts]
-cloudflare-monitor = "cloudflare_monitor:main"
-incident-monitor = "incident_monitor:main"
+cloudflare-monitor = "cloudflare_monitor.monitor:main"
+incident-monitor = "cloudflare_monitor.incident:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.ruff]
 line-length = 88
@@ -72,7 +75,7 @@ indent-style = "space"
 line-ending = "auto"
 
 [tool.ruff.lint.isort]
-known-first-party = ["cloudflare_monitor", "incident_monitor", "notifications"]
+known-first-party = ["cloudflare_monitor"]
 
 [tool.mypy]
 python_version = "3.11"
